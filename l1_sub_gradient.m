@@ -49,7 +49,7 @@ for count = 1:length(mus)
         % apply gradient descent step
         grad  =  A' * (A * x) - Atb + mu * sign(x);
         dx = -alpha * grad;
-        x = x + -alpha * grad;
+        x = x + dx;
         
         % stop when the relative improvement is small
         if norm(dx, 2) <= tolA
