@@ -1,11 +1,12 @@
 # L1-Regularized-Problem
-Here is my solution to the convex optimization problem implementing different algorithms.
+Here is my solution to the following convex optimization problem,
 
 <div align = 'center'>
 <img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/eq1.gif" width='280px'>
 </div>
 
 ## Algorithms
+Below are the implemented algorithms so far,
 * Call of CVX
   * CVX Mosek
   * CVX Gurobi
