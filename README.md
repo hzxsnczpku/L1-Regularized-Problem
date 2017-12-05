@@ -15,7 +15,6 @@ Below are the implemented algorithms so far,
 * Projection Gradient Method
 * Sub Gradient Method
 * Gradient Method for the Smoothed Primal Problem
-  * Gradient Methods
 * Fast Gradient Method for the Smoothed Primal Problem
   * FISTA
   * Nesterov's Second Merhod
