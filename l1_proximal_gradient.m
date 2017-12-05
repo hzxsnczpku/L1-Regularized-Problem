@@ -1,12 +1,12 @@
-function [x,out]= l1_sub_gradient(x0, A, b, mu, opts)
+function [x,out]= l1_proximal_gradient(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
-%  L1 Sub Gradient Method
+%  L1 Proximal Gradient Method
 %
 %  This function solves the convex problem
 %
 %     x = argmin 0.5 * ||Ax - b||_2^2 + mu * ||x||_1
 %
-%  using the the sub gradient method. 
+%  using the the proximal gradient method. 
 %
 %  Author: Ni Chengzhuo, School of Mathematical Science, PKU
 %  --------------------------------------------------------------
@@ -37,7 +37,7 @@ function [x,out]= l1_sub_gradient(x0, A, b, mu, opts)
 Atb = A' * b;              % precompute A^Tb due to its frequent usage
 alpha = 3e-4;              % initial step length
 tolA = 1e-12;               % stopping criterion
-maximum_step = 350;
+maximum_step = 300;
 x = x0;                    % set the initial point
 
 %% Gradient Descent Loop
@@ -47,9 +47,12 @@ for count = 1:length(mus)
     mu = mus(count);
     for step=1:maximum_step
         % apply gradient descent step
-        grad  =  A' * (A * x) - Atb + mu * sign(x);
-        dx = -alpha * grad;
-        x = x + dx;
+        old_x = x;
+        grad = A' * (A * x) - Atb;
+        tmp = x - alpha * grad;
+        beta = alpha * mu;
+        x = (abs(tmp) > beta) .* (tmp - sign(tmp) * beta);
+        dx = x - old_x;
         
         % stop when the relative improvement is small
         if norm(dx, 2) <= tolA * norm(x, 2)

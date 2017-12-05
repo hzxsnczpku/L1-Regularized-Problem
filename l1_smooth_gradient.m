@@ -1,4 +1,4 @@
-function [x,out]= l1_sub_gradient(x0, A, b, mu, opts)
+function [x,out]= l1_smooth_gradient(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
 %  L1 Sub Gradient Method
 %
@@ -39,6 +39,7 @@ alpha = 3e-4;              % initial step length
 tolA = 1e-12;               % stopping criterion
 maximum_step = 350;
 x = x0;                    % set the initial point
+t = 1e-6;
 
 %% Gradient Descent Loop
 mus = mu * [1e5, 1e4, 1e3, 1e2, 1e1, 1e0];
@@ -47,7 +48,7 @@ for count = 1:length(mus)
     mu = mus(count);
     for step=1:maximum_step
         % apply gradient descent step
-        grad  =  A' * (A * x) - Atb + mu * sign(x);
+        grad = A' * (A * x) - Atb + mu * min(max(x/t, -1), 1);
         dx = -alpha * grad;
         x = x + dx;
         

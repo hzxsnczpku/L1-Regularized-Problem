@@ -1,6 +1,6 @@
-function [x,out]= l1_sub_gradient(x0, A, b, mu, opts)
+function [x,out]= l1_smooth_FISTA_gradient(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
-%  L1 Sub Gradient Method
+%  L1 Smooth FISTA Gradient Method
 %
 %  This function solves the convex problem
 %
@@ -36,9 +36,11 @@ function [x,out]= l1_sub_gradient(x0, A, b, mu, opts)
 %% Initialization
 Atb = A' * b;              % precompute A^Tb due to its frequent usage
 alpha = 3e-4;              % initial step length
-tolA = 1e-12;               % stopping criterion
-maximum_step = 350;
+tolA = 1e-7;               % stopping criterion
+maximum_step = 50;
 x = x0;                    % set the initial point
+old_x = x;
+t = 1e-6;
 
 %% Gradient Descent Loop
 mus = mu * [1e5, 1e4, 1e3, 1e2, 1e1, 1e0];
@@ -47,9 +49,15 @@ for count = 1:length(mus)
     mu = mus(count);
     for step=1:maximum_step
         % apply gradient descent step
-        grad  =  A' * (A * x) - Atb + mu * sign(x);
-        dx = -alpha * grad;
-        x = x + dx;
+        y = x + 1.0 * (step - 2) / (step + 1) * (x - old_x);
+        old_x = x;
+        grad = A' * (A * y) - Atb;
+        tmp = y - alpha * grad;
+        beta = alpha * mu;
+        x = (abs(tmp) <= beta + t) .* tmp * t / (t + beta) + ...
+            (tmp > beta + t).*(tmp - beta) + ...
+            (tmp < -beta - t).*(tmp + beta);
+        dx = x - old_x;
         
         % stop when the relative improvement is small
         if norm(dx, 2) <= tolA * norm(x, 2)
