@@ -1,12 +1,12 @@
-function [x,out]= l1_smooth_gradient(x0, A, b, mu, opts)
+function [x, out] = l1_augmented_Lagrangian(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
-%  L1 Smooth Gradient Method
+%  L1 Dual Augmented Lagrangian Method
 %
 %  This function solves the convex problem
 %
 %     x = argmin 0.5 * ||Ax - b||_2^2 + mu * ||x||_1
 %
-%  using the gradient method for the smoothed primal problem.
+%  using the Augmented Lagrangian Method for the dual problem. 
 %
 %  Author: Ni Chengzhuo, School of Mathematical Science, PKU
 %  --------------------------------------------------------------
@@ -33,59 +33,70 @@ function [x,out]= l1_smooth_gradient(x0, A, b, mu, opts)
 %
 %  ==============================================================
 
-    %% Hyperparameters
-    if isfield(opts, 'alpha')                % initial step size
+%% Hyperparameters
+    if isfield(opts, 'alpha')          
         alpha = opts.alpha;
     else
-        alpha = 3e-4;              
+        alpha = 3e-6;              
+    end
+
+    if isfield(opts, 'beta')          
+        beta = opts.beta;
+    else
+        beta = 150.0;              
     end
     
-    if isfield(opts, 'thres')                % stopping criterion
+    if isfield(opts, 'gamma')          
+        gamma = opts.gamma;
+    else
+        gamma = 1.618;              
+    end
+
+    if isfield(opts, 'thres')          % stopping criterion
         thres = opts.thres;              
     else
-        thres = 5e-10;
+        thres = 5e-10; 
     end
-    
+
     if isfield(opts, 'maximum_step')         % maximun step
         maximum_step = opts.maximum_step;              
     else
-        maximum_step = 350;
+        maximum_step = 40;
     end
     
-    if isfield(opts, 't')
-        t = opts.t;              
+    if isfield(opts, 'grad_step')         % maximun step
+        grad_step = opts.grad_step;              
     else
-        t = 1e-6;
+        grad_step = 20;
     end
     
     %% Initialization
-    Atb = A' * b;              % precompute A^Tb
-    x = x0;                    % set the initial point
+    x = x0;
+    y = randn(length(b), 1);
     k = 1;
-    mus = mu * [1e5, 1e4, 1e3, 1e2, 1e1, 1e0];
-    path = zeros(1, maximum_step * length(mus));
-    path(k) = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
+    path = zeros(1, maximum_step);
     
-    %% Gradient Descent Loop
-    for count = 1:length(mus)
-        % anneal mu gradually
-        mu = mus(count);
-        for step=1:maximum_step
-            k = k + 1;
-            
-            % apply gradient descent step
-            grad = A' * (A * x) - Atb + mu * min(max(x/t, -1), 1);
-            x = x -alpha * grad;
-
-            path(k) = 0.5 * norm(A * x - b, 2)^2 + mus(length(mus)) * norm(x, 1);
-
-            % stop when the relative improvement is small
-            if abs(path(k)-path(k-1)) <= thres * path(k-1)
-                break;
-            end
+    %% ALM Loop
+    for step=1:maximum_step
+        k = k + 1;
+        for i=1:grad_step
+            tmp = A' * y - x / beta;
+            prox = (abs(tmp) > mu) .* (tmp - sign(tmp) * mu);
+            grad = y + b + beta * A * prox;
+            y = y - alpha * grad;
         end
-    end
+        z = max(min(A' * y - x / beta, mu), -mu);
+        x = x - beta * gamma * (A' * y - z);
+        
+        path(k) = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
 
+        % stop when the relative improvement is small
+        if abs(path(k)-path(k-1)) <= thres * path(k-1)
+            break;
+        end
+        
+    end
+    
     %% Output
     out.optval = path(k);
     out.step = k;

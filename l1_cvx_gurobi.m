@@ -13,23 +13,23 @@ function [x, out] = l1_cvx_gurobi(x0, A, b, mu, opts)
 %
 %  =========================== Inputs ===========================
 %  
-%  x0: m * 1 matrix, the starting point of the algotirhm
+%    x0: m * 1 matrix, the starting point of the algotirhm
 %
-%  A: m * n matrix, the matrix to compute the l2 norm
+%     A: m * n matrix, the matrix to compute the l2 norm
 %
-%  b: m * 1 matrix, the target of approximation
+%     b: m * 1 matrix, the target of approximation
 %
-%  mu: scalar, penalty of the l1 norm
+%    mu:       scalar, penalty of the l1 norm
 %
-%  opts: list, modify options
+%  opts:    structure, modify options
 %
 %  ==============================================================
 %
 %  =========================== Outputs ==========================
 %  
-%  x: the optimal point found by the algorithm
+%     x: m * 1 matrix, the optimal point found by the algorithm
 %
-%  out: a structure recording some information about the process
+%   out:    structure, record of the process information
 %
 %  ==============================================================
 
@@ -44,5 +44,8 @@ cvx_end
 
 %% Output
 out.optval = cvx_optval;
+out.step = NaN;
+out.solution_path = [];
+out.status = 'Solved';
 
 end

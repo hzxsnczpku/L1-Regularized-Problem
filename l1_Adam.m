@@ -1,12 +1,12 @@
-function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
+function [x,out]= l1_Adam(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
-%  L1 Smooth Nesterov Gradient Method
+%  L1 Adam
 %
 %  This function solves the convex problem
 %
 %     x = argmin 0.5 * ||Ax - b||_2^2 + mu * ||x||_1
 %
-%  using the Nesterov's second method for the smoothed primal problem. 
+%  using Adam. 
 %
 %  Author: Ni Chengzhuo, School of Mathematical Science, PKU
 %  --------------------------------------------------------------
@@ -37,7 +37,7 @@ function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
     if isfield(opts, 'alpha')                % initial step size
         alpha = opts.alpha;
     else
-        alpha = 3e-4;              
+        alpha = 3e-2;              
     end
     
     if isfield(opts, 'thres')                % stopping criterion
@@ -49,23 +49,31 @@ function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
     if isfield(opts, 'maximum_step')         % maximun step
         maximum_step = opts.maximum_step;              
     else
-        maximum_step = 30;
+        maximum_step = 500;
     end
     
-    if isfield(opts, 't')
-        t = opts.t;              
+    if isfield(opts, 'rho1')         % maximun step
+        rho1 = opts.rho1;              
     else
-        t = 1e-6;
+        rho1 = 0.9;
+    end
+    
+    if isfield(opts, 'rho2')         % maximun step
+        rho2 = opts.rho1;              
+    else
+        rho2 = 0.999;
     end
     
     %% Initialization
     Atb = A' * b;                           % precompute A^T * b
     x = x0;                                 % set the initial point
-    v = x;
     k = 1;
+    delta = 1e-8;
     mus = mu * [1e5, 1e4, 1e3, 1e2, 1e1, 1e0];
     path = zeros(1, maximum_step * length(mus));
     path(k) = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
+    r = zeros(length(x0), 1);
+    s = zeros(length(x0), 1);
 
     %% Gradient Descent Loop
     for count = 1:length(mus)
@@ -74,15 +82,16 @@ function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
             k = k + 1;
             
             % apply gradient descent step
-            theta = 2.0 / step;
-            y = (1.0 - theta) * x + theta * v;
-            grad = A' * (A * y) - Atb;
-            tmp = v - alpha / theta * grad;
-            beta = alpha * mu / theta;
-            v = (abs(tmp) <= beta + t) .* tmp * t / (beta + t) + ...
-                (tmp > beta + t) .* (tmp - beta) + ...
-                (tmp < -beta - t) .* (tmp + beta);
-            dx = theta * (v - x);
+            grad = A' * (A * x) - Atb;
+            s = rho1 * s + (1 - rho1) * grad;
+            r = rho2 * r + (1 - rho2) * grad .* grad;
+            s_hat = s / (1 - rho1^(k - 1));
+            r_hat = r / (1 - rho2^(k - 1));
+            dx = -alpha * s_hat ./ (delta + sqrt(r_hat));
+            
+            tmp = x + dx;
+            beta = alpha * mu ./ (delta + sqrt(r_hat));
+            x = (abs(tmp) > beta) .* (tmp - sign(tmp) .* beta);
             x = x + dx;
             
             path(k) = 0.5 * norm(A * x - b, 2)^2 + mus(length(mus)) * norm(x, 1);

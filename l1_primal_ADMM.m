@@ -1,12 +1,12 @@
-function [x,out]= l1_proximal_FISTA_gradient(x0, A, b, mu, opts)
+function [x, out] = l1_primal_ADMM(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
-%  L1 FISTA Method
+%  L1 Primal ADMM Method
 %
 %  This function solves the convex problem
 %
 %     x = argmin 0.5 * ||Ax - b||_2^2 + mu * ||x||_1
 %
-%  using FISTA. 
+%  using ADMM for the primal problem. 
 %
 %  Author: Ni Chengzhuo, School of Mathematical Science, PKU
 %  --------------------------------------------------------------
@@ -33,55 +33,56 @@ function [x,out]= l1_proximal_FISTA_gradient(x0, A, b, mu, opts)
 %
 %  ==============================================================
 
-    %% Hyperparameters
-    if isfield(opts, 'alpha')                % initial step size
-        alpha = opts.alpha;
+%% Hyperparameters
+    if isfield(opts, 'beta')          
+        beta = opts.beta;
     else
-        alpha = 3e-4;              
+        beta = 0.3;              
     end
     
-    if isfield(opts, 'thres')                % stopping criterion
+    if isfield(opts, 'gamma')          
+        gamma = opts.gamma;
+    else
+        gamma = 1.618;              
+    end
+
+    if isfield(opts, 'thres')          % stopping criterion
         thres = opts.thres;              
     else
-        thres = 5e-10;  % 1e-7
+        thres = 5e-10; 
     end
-    
+
     if isfield(opts, 'maximum_step')         % maximun step
         maximum_step = opts.maximum_step;              
     else
-        maximum_step = 50;
+        maximum_step = 400;
     end
     
     %% Initialization
-    Atb = A' * b;              % precompute A^Tb
-    x = x0;                    % set the initial point
-    old_x = x;
+    x = x0;
+    y = randn(length(x0), 1);
+    z = randn(length(x0), 1);
+    ATb = A' * b;
+    [L, U] = lu(beta * eye(length(x0)) + (A' * A));
     k = 1;
-    mus = mu * [1e5, 1e4, 1e3, 1e2, 1e1, 1e0];
-    path = zeros(1, maximum_step * length(mus));
+    path = zeros(1, maximum_step);
     path(k) = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
+    
+    %% ADMM Loop
+    for step = 1:maximum_step
+        k = k + 1;
+        
+        x = U \ (L \ (ATb + beta * y - z));
+        tmp = x + z / beta;
+        tar = 2 * mu / beta;
+        y = (abs(tmp) > tar) .* (tmp - sign(tmp) * tar);
+        z = z + gamma * beta * (x - y);
+        
+        path(k) = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
 
-    %% Gradient Descent Loop
-    for count = 1:length(mus)
-        % anneal mu gradually
-        mu = mus(count);
-        for step=1:maximum_step
-            k = k + 1;
-            
-            % apply gradient descent step
-            y = x + 1.0 * (step - 2) / (step + 1) * (x - old_x);
-            old_x = x;
-            grad = A' * (A * y) - Atb;
-            tmp = y - alpha * grad;
-            beta = alpha * mu;
-            x = (abs(tmp) > beta) .* (tmp - sign(tmp) * beta);
-
-            path(k) = 0.5 * norm(A * x - b, 2)^2 + mus(length(mus)) * norm(x, 1);
-
-            % stop when the relative improvement is small
-            if abs(path(k) - path(k-1)) <= thres * path(k - 1)
-                break;
-            end
+        % stop when the relative improvement is small
+        if abs(path(k)-path(k-1)) <= thres * path(k-1)
+            break;
         end
     end
 
@@ -90,5 +91,5 @@ function [x,out]= l1_proximal_FISTA_gradient(x0, A, b, mu, opts)
     out.step = k;
     out.solution_path = path(1:k);
     out.status = 'Solved';
-
+    
 end

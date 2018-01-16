@@ -1,12 +1,12 @@
-function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
+function [x,out]= l1_momentum_gradient(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
-%  L1 Smooth Nesterov Gradient Method
+%  L1 Momentum Gradient Method
 %
 %  This function solves the convex problem
 %
 %     x = argmin 0.5 * ||Ax - b||_2^2 + mu * ||x||_1
 %
-%  using the Nesterov's second method for the smoothed primal problem. 
+%  using the momentum gradient method. 
 %
 %  Author: Ni Chengzhuo, School of Mathematical Science, PKU
 %  --------------------------------------------------------------
@@ -49,23 +49,23 @@ function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
     if isfield(opts, 'maximum_step')         % maximun step
         maximum_step = opts.maximum_step;              
     else
-        maximum_step = 30;
+        maximum_step = 100;
     end
     
-    if isfield(opts, 't')
-        t = opts.t;              
+    if isfield(opts, 'm')         % maximun step
+        m = opts.m;             
     else
-        t = 1e-6;
+        m = 0.9;
     end
     
     %% Initialization
     Atb = A' * b;                           % precompute A^T * b
     x = x0;                                 % set the initial point
-    v = x;
     k = 1;
     mus = mu * [1e5, 1e4, 1e3, 1e2, 1e1, 1e0];
     path = zeros(1, maximum_step * length(mus));
     path(k) = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
+    v = zeros(length(x0), 1);
 
     %% Gradient Descent Loop
     for count = 1:length(mus)
@@ -74,16 +74,9 @@ function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
             k = k + 1;
             
             % apply gradient descent step
-            theta = 2.0 / step;
-            y = (1.0 - theta) * x + theta * v;
-            grad = A' * (A * y) - Atb;
-            tmp = v - alpha / theta * grad;
-            beta = alpha * mu / theta;
-            v = (abs(tmp) <= beta + t) .* tmp * t / (beta + t) + ...
-                (tmp > beta + t) .* (tmp - beta) + ...
-                (tmp < -beta - t) .* (tmp + beta);
-            dx = theta * (v - x);
-            x = x + dx;
+            grad = A' * (A * x) - Atb + mu * sign(x);
+            v = m * v - alpha * grad;
+            x = x + v;
             
             path(k) = 0.5 * norm(A * x - b, 2)^2 + mus(length(mus)) * norm(x, 1);
 

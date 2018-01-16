@@ -1,12 +1,12 @@
-function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
+function [x, out] = l1_primal_linearization_ADMM(x0, A, b, mu, opts)
 %  --------------------------------------------------------------
-%  L1 Smooth Nesterov Gradient Method
+%  L1 Primal Linearization ADMM Method
 %
 %  This function solves the convex problem
 %
 %     x = argmin 0.5 * ||Ax - b||_2^2 + mu * ||x||_1
 %
-%  using the Nesterov's second method for the smoothed primal problem. 
+%  using linearization ADMM for the primal problem. 
 %
 %  Author: Ni Chengzhuo, School of Mathematical Science, PKU
 %  --------------------------------------------------------------
@@ -33,58 +33,62 @@ function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
 %
 %  ==============================================================
 
-    %% Hyperparameters
+%% Hyperparameters
     if isfield(opts, 'alpha')                % initial step size
         alpha = opts.alpha;
     else
-        alpha = 3e-4;              
+        alpha = 7e-4;              
     end
     
-    if isfield(opts, 'thres')                % stopping criterion
+    if isfield(opts, 'beta')          
+        beta = opts.beta;
+    else
+        beta = 0.3;              
+    end
+    
+    if isfield(opts, 'gamma')          
+        gamma = opts.gamma;
+    else
+        gamma = 2;              
+    end
+
+    if isfield(opts, 'thres')          % stopping criterion
         thres = opts.thres;              
     else
-        thres = 1e-7;
+        thres = 5e-10; 
     end
-    
+
     if isfield(opts, 'maximum_step')         % maximun step
         maximum_step = opts.maximum_step;              
     else
-        maximum_step = 30;
-    end
-    
-    if isfield(opts, 't')
-        t = opts.t;              
-    else
-        t = 1e-6;
+        maximum_step = 120;
     end
     
     %% Initialization
-    Atb = A' * b;                           % precompute A^T * b
-    x = x0;                                 % set the initial point
-    v = x;
+    x = x0;
+    y = randn(length(b), 1);
+    z = randn(length(b), 1);
     k = 1;
     mus = mu * [1e5, 1e4, 1e3, 1e2, 1e1, 1e0];
     path = zeros(1, maximum_step * length(mus));
     path(k) = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
-
-    %% Gradient Descent Loop
+    
+    %% ADMM Loop
     for count = 1:length(mus)
-        mu = mus(count);                    % anneal mu gradually
-        for step=1:maximum_step
+        % anneal mu gradually
+        mu = mus(count);
+        for step = 1:maximum_step
             k = k + 1;
-            
-            % apply gradient descent step
-            theta = 2.0 / step;
-            y = (1.0 - theta) * x + theta * v;
-            grad = A' * (A * y) - Atb;
-            tmp = v - alpha / theta * grad;
-            beta = alpha * mu / theta;
-            v = (abs(tmp) <= beta + t) .* tmp * t / (beta + t) + ...
-                (tmp > beta + t) .* (tmp - beta) + ...
-                (tmp < -beta - t) .* (tmp + beta);
-            dx = theta * (v - x);
-            x = x + dx;
-            
+
+            grad = beta * A' * (A * x - b - y + z / beta);
+            tmp = x - alpha * grad;
+            t = alpha * mu;
+            x = sign(tmp) .* max(abs(tmp) - t, 0);
+
+            Ax = A * x;
+            y = (beta * Ax - beta * b + z) / (1 + beta);
+            z = z + gamma * beta * (Ax - b - y);
+
             path(k) = 0.5 * norm(A * x - b, 2)^2 + mus(length(mus)) * norm(x, 1);
 
             % stop when the relative improvement is small
@@ -99,5 +103,5 @@ function [x,out]= l1_smooth_Nesterov_gradient(x0, A, b, mu, opts)
     out.step = k;
     out.solution_path = path(1:k);
     out.status = 'Solved';
-
+    
 end

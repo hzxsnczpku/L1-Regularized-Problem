@@ -13,44 +13,47 @@ function [x, out] = l1_gurobi(x0, A, b, mu, opts)
 %
 %  =========================== Inputs ===========================
 %  
-%  x0: m * 1 matrix, the starting point of the algotirhm
+%    x0: m * 1 matrix, the starting point of the algotirhm
 %
-%  A: m * n matrix, the matrix to compute the l2 norm
+%     A: m * n matrix, the matrix to compute the l2 norm
 %
-%  b: m * 1 matrix, the target of approximation
+%     b: m * 1 matrix, the target of approximation
 %
-%  mu: scalar, penalty of the l1 norm
+%    mu:       scalar, penalty of the l1 norm
 %
-%  opts: list, modify options
+%  opts:    structure, modify options
 %
 %  ==============================================================
 %
 %  =========================== Outputs ==========================
 %  
-%  x: the optimal point found by the algorithm
+%     x: m * 1 matrix, the optimal point found by the algorithm
 %
-%  out: a structure recording some information about the process
+%   out:    structure, record of the process information
 %
 %  ==============================================================
 
-%% Problem Setting
-[m, n] = size(A);
+    %% Initialization
+    [m, n] = size(A);
 
-clear model;
-model.Q = sparse(2 * n + 1:2 * n + m, 2 * n + 1:2 * n + m, 0.5 * ones(m, 1));
-model.A = sparse([A, -A, -eye(m)]);
-model.obj = mu * [ones(2 * n, 1); zeros(m, 1)];
+    clear model;
+    model.Q = sparse(2 * n + 1:2 * n + m, 2 * n + 1:2 * n + m, 0.5 * ones(m, 1));
+    model.A = sparse([A, -A, -eye(m)]);
+    model.obj = mu * [ones(2 * n, 1); zeros(m, 1)];
 
-model.rhs = b;
-model.sense = '=';
-model.lb = [zeros(2 * n, 1); -inf * ones(m, 1)];
-model.ub = inf * ones(2 * n + m, 1);
+    model.rhs = b;
+    model.sense = '=';
+    model.lb = [zeros(2 * n, 1); -inf * ones(m, 1)];
+    model.ub = inf * ones(2 * n + m, 1);
 
-%% Call Gurobi
-result = gurobi(model);
+    %% Call Gurobi
+    result = gurobi(model);
 
-%% Output
-x = result.x(1:n) - result.x(n + 1:2 * n);
-out.optval = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
+    %% Output
+    x = result.x(1:n) - result.x(n + 1:2 * n);
+    out.optval = 0.5 * norm(A * x - b, 2)^2 + mu * norm(x, 1);
+    out.step = NaN;
+    out.solution_path = [];
+    out.status = 'Solved';
 
 end

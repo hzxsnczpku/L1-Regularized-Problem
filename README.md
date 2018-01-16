@@ -17,10 +17,19 @@ Below are the implemented algorithms so far,
 * Gradient Method for the Smoothed Primal Problem
 * Fast Gradient Method for the Smoothed Primal Problem
   * FISTA
-  * Nesterov's Second Merhod
+  * Nesterov's Second Method
 * Fast Gradient Method for the Primal Problem
   * FISTA
-  * Nesterov's Second Merhod
+  * Nesterov's Second Method
+* Augmented Lagrangian Method
+* ADMM for the Primal problem
+* ADMM for the Dual problem
+* ADMM for the Linearized Primal Problem
+* Momentum Gradient Method
+* Nesterov's Momentum Gradient Method
+* AdaGrad
+* RMSProp
+* Adam
 
 Under Construction...
 
