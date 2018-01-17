@@ -2,7 +2,7 @@
 Here is my solution to the following convex optimization problem,
 
 <div align = 'center'>
-<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/eq1.gif" width='280px'>
+<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/pb.png?token=Ac3JKCcnZscE3xaEkzjc5uYIv60_tjCuks5aaD3twA%3D%3D" width='280px'>
 </div>
 
 ## Algorithms
