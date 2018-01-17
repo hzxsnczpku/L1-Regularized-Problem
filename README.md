@@ -115,10 +115,16 @@ seed = 0
 <div align = 'center'>
 <img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F2.png?token=Ac3JKG-51EKcfQ7sD1Xiq6vZ5HHQOIUOks5aaD_PwA%3D%3D" width='280px'>
 <img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F3.png?token=Ac3JKENQUAWpECQPmb7Kl5-Rj4YnUEZkks5aaD_twA%3D%3D" width='280px'>
-<br>
+</div>
+
+seed = 23333
+<div align = 'center'>
 <img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F5.png?token=Ac3JKPmvjgIwck6hfAFgE__PYSCHunpCks5aaEAowA%3D%3D" width='280px'>
 <img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F6.png?token=Ac3JKN0BVeqWL_Vq06a9ozNI50qafBTjks5aaEA5wA%3D%3D" width='280px'>
-<br>
+</div>
+
+seed = 666666
+<div align = 'center'>
 <img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F8.png?token=Ac3JKOeUy59pdWLwXpcK9MfzXwqVPkk2ks5aaEBLwA%3D%3D" width='280px'>
 <img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F9.png?token=Ac3JKJ1iHiNQz6FrJofblhjZ2PSHlkxfks5aaEB_wA%3D%3D" width='280px'>
 </div>
