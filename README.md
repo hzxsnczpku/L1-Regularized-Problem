@@ -113,6 +113,6 @@ Seed = 666666
 ## Solution Paths
 seed = 0
 <div align = 'center'>
-<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F2.eps" width='280px'>
-<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F3.eps" width='280px'>
+<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F2.png" width='280px'>
+<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F3.png" width='280px'>
 </div>
