@@ -110,4 +110,9 @@ Seed = 666666
 |                   RMSProp | 0.389 | 1.143e-05 | 6.37318376e-02 | 1593 |
 |                      Adam | 0.515 | 1.682e-06 | 6.37297978e-02 | 2099 |
 
-Under Construction...
+## Solution Paths
+seed = 0
+<div align = 'center'>
+<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F2.eps" width='280px'>
+<img src = "https://raw.githubusercontent.com/hzxsnczpku/L1-Regularized-Problem/master/images/F3.eps" width='280px'>
+</div>
