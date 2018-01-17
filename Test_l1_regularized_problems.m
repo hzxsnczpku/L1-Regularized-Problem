@@ -1,6 +1,6 @@
 % function Test_l1_regularized_problems
 % x = argmin 0.5 * ||Ax - b||_2^2 + mu * ||x||_1
-rng(666666)
+rng(23333)
 %% generate data
 n = 1024;
 m = 512;
@@ -15,13 +15,13 @@ errfun = @(x1, x2) norm(x1 - x2)/(1 + norm(x1));
 %    '%25s: time: %5.3f, err-to-cvx-mosek: %3.3e, optval: %2.8e, iter: %d\n', ...
 %    name, t, errfun(x_m, x), out.optval, out.step);
 
-printfun = @(name, t, x, x_m, out) fprintf(...
-    '& %25s & %5.3f & %3.3e & %2.8e & %d\\\\\n', ...
-    name, t, errfun(x_m, x), out.optval, out.step);
-
 %printfun = @(name, t, x, x_m, out) fprintf(...
-%    '| %25s | %5.3f | %3.3e | %2.8e | %d |\n', ...
+%    '& %25s & %5.3f & %3.3e & %2.8e & %d\\\\\n', ...
 %    name, t, errfun(x_m, x), out.optval, out.step);
+
+printfun = @(name, t, x, x_m, out) fprintf(...
+    '| %25s | %5.3f | %3.3e | %2.8e | %d |\n', ...
+    name, t, errfun(x_m, x), out.optval, out.step);
 
 %% cvx calling mosek
 opts1 = [];
